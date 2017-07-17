@@ -11,7 +11,7 @@ export function sketch(p) {
   let amplitude
   let fft
 
-  let beatDetector
+  let detectors = {}
 
   p.preload = function () {
     sampleSound = p.loadSound('assets/sample.mp3')
@@ -25,30 +25,39 @@ export function sketch(p) {
     fft = new p5.FFT()
 
     sampleSound.play()
-    sampleSound.pause()
 
-    beatDetector = new BeatDetector(20, 0.9, 0.15)
+    detectors['bass'] = new BeatDetector(10, 0.85, 0.65)
+    detectors['lowMid'] = new BeatDetector(30, 0.97, 0.40)
+    detectors['mid'] = new BeatDetector(20, 0.90, 0.3)
+    detectors['highMid'] = new BeatDetector(40, 0.97, 0.3)
+    detectors['treble'] = new BeatDetector(20, 0.90, 0.15)
   }
 
   p.draw = function () {
     p.clear()
     p.background(0)
 
-    const level = amplitude.getLevel()
-    const isBeatDetected = beatDetector.detect(level)
+    fft.analyze()
 
-    const x = p.width / 2
-    drawLevelBar(x, level)
+    for (let i = 0; i < ranges.length; i += 1) {
+      const r = ranges[i]
+      const x = i * (p.width / ranges.length) + 30
+      const e = fft.getEnergy(r)
+      const level = e / 255.0
 
-    const th = p.map(beatDetector.cutOff, 0, 0.7, 0, p.height)
-    p.fill(0, 255, 0)
-    p.rect(x - 30, p.height - th, 60, 10)
+      const beatDetector = detectors[r]
+      const isBeatDetected = beatDetector.detect(level)
 
-    let circleSize
-    if (isBeatDetected) {
-      p.fill(255)
-      circleSize = 60
-      p.ellipse(x, 100, circleSize, circleSize)
+      p.fill(255, 0, 0)
+      drawLevelBar(x, level)
+
+      p.fill(0, 255, 0)
+      drawThreshold(x, beatDetector.cutOff)
+
+      if (isBeatDetected) {
+        p.fill(255)
+        p.ellipse(x, 100, 60, 60)
+      }
     }
   }
 
@@ -60,10 +69,17 @@ export function sketch(p) {
     }
   }
 
+  let drawThreshold = (x, level) => {
+    const barWidth = 60
+    const maxHeight = p.height - 400
+    const barHeight = p.map(level, 0, 1.0, 0, maxHeight)
+    p.rect(x - 30, p.height - barHeight, barWidth, 10)
+  }
+
   let drawLevelBar = (x, level) => {
     const barWidth = 60
-    const maxHeight = p.height - 200
-    const barHeight = p.map(level, 0, 0.7, 0, maxHeight)
+    const maxHeight = p.height - 400
+    const barHeight = p.map(level, 0, 1.0, 0, maxHeight)
     p.rect(x - barWidth / 2, p.height - barHeight, barWidth, barHeight)
   }
 }
