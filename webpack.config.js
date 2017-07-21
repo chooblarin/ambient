@@ -41,6 +41,10 @@ const common = {
         options: {
           limit: 25000
         }
+      },
+      {
+        test: /\.(jpe?g|gif|png|svg|woff|ttf|wav|mp3)$/,
+        loaders: 'file'
       }
     ]
   }
