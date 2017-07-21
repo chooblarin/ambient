@@ -2,19 +2,51 @@ import p5 from 'p5'
 import 'p5/lib/addons/p5.sound'
 
 import Particle from './Particle'
+import {
+  SpectrumBeats,
+  ranges
+} from './SpectrumBeats'
 
 export function sketch(p) {
 
   let p5canvas
+  let sampleSound
+  let fft
   let particles = []
+
+  let pprops = {
+    'bass': {size: 80, count: 3},
+    'lowMid': {size: 40, count: 3},
+    'mid': {size: 30, count: 5},
+    'highMid': {size: 20, count: 5},
+    'treble': {size: 5, count: 40},
+  }
+
+  p.preload = function () {
+    sampleSound = p.loadSound('assets/sample.mp3')
+  }
 
   p.setup = () => {
     p5canvas = p.createCanvas(p.windowWidth, p.windowHeight)
+    fft = new p5.FFT()
+    sampleSound.play()
   }
 
   p.draw = () => {
     p.clear()
-    p.background(0)
+    p.background(255)
+
+    fft.analyze()
+    const beats = SpectrumBeats.detect(fft)
+    for (let b of beats) {
+      const count = pprops[b].count
+      for (let i = 0; i < count; i += 1) {
+        const col = randomColor()
+        const size = pprops[b].size
+        const particle = spawnParticle(size, col)
+        particles.push(particle)
+      }
+    }
 
     let nextGeneration = []
     for (let particle of particles) {
@@ -37,7 +69,7 @@ export function sketch(p) {
     }
   }
 
-  let spawnParticle = () => {
+  let spawnParticle = (size, col) => {
     const x = p.random(p.width)
     const y = p.random(p.height)
     const pos = p.createVector(x, y)
@@ -45,8 +77,6 @@ export function sketch(p) {
     const acc = p.createVector(0, 0)
     vel.normalize()
     vel.mult(5.0)
-    const size = 10.0
-    const col = p.color(255)
     return new Particle(pos, vel, acc, size, col)
   }
 
