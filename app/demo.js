@@ -89,8 +89,8 @@ export function sketch(p) {
   }
 
   let spawnParticle = (size, col) => {
-    const x = p.random(p.width)
-    const y = p.random(p.height)
+    const x = p.random(-p.width / 2.0, p.width / 2.0)
+    const y = p.random(-p.height / 2.0, p.height / 2.0)
     const z = p.random(100, -1000)
     const pos = p.createVector(x, y, z)
     const vel = p5.Vector.random3D()

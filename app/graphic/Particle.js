@@ -41,7 +41,6 @@ class Particle {
     const col = $.color(colR, colG, colB, colA)
     $.fill(col)
     $.push()
-    $.translate(- $.width / 2.0, - $.height / 2.0)
     $.translate(this.pos.x, this.pos.y, this.pos.z)
     $.sphere(this.radius)
     $.pop()
