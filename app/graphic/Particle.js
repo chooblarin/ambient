@@ -24,6 +24,11 @@ class Particle {
     return 0 < this.life
   }
 
+  resetLife(val) {
+    this.life = val
+    this.maxLife = val
+  }
+
   update() {
     this.vel.add(this.acc)
     this.pos.add(this.vel)

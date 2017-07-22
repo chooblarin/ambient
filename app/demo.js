@@ -11,6 +11,7 @@ export function sketch(p) {
 
   let p5canvas
   let sampleSound
+  let amplitude
   let fft
   let particles = []
 
@@ -34,8 +35,10 @@ export function sketch(p) {
     'treble': {
       size: 10,
       count: 30
-    },
+    }
   }
+
+  let mode = 1
 
   p.preload = function () {
     sampleSound = p.loadSound('assets/sample.mp3')
@@ -43,6 +46,7 @@ export function sketch(p) {
 
   p.setup = () => {
     p5canvas = p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL)
+    amplitude = new p5.Amplitude()
     fft = new p5.FFT()
     sampleSound.play()
   }
@@ -54,27 +58,74 @@ export function sketch(p) {
 
     fft.analyze()
     const beats = SpectrumBeats.detect(fft)
-
-    drawRandomly(beats)
-
-    let nextGeneration = []
-    for (let particle of particles) {
-      particle.draw(p)
-      particle.update()
-
-      if (particle.isAlive()) {
-        nextGeneration.push(particle)
-      }
-    }
-    particles = nextGeneration
+    generate(beats)
+    particles = step(beats)
   }
 
   p.keyPressed = () => {
-    if (32 == p.keyCode) { // Space
+    switch (p.keyCode) {
+      case 48: // 0
+        mode = 0
+        break
+      case 49: // 1
+        concentrate()
+        mode = 1
+        break
+      case 50: // 2
+        mode = 2
+        break
+      case 67: // c
+        concentrate()
+        break
+      case 32: // Space
+        break
     }
   }
 
-  let drawRandomly = (beats) => {
+  let generate = (beats) => {
+    switch (mode) {
+      case 0:
+        generateRandomly(beats)
+        break
+      case 1:
+        generateCentered(beats)
+        break
+      case 2:
+        // no generation
+        break
+    }
+  }
+
+  let step = (beats) => {
+    let nextGeneration = []
+    for (let particle of particles) {
+      switch (mode) {
+        case 0:
+          particle.draw(p)
+          particle.update()
+          if (particle.isAlive()) {
+            nextGeneration.push(particle)
+          }
+          break
+        case 1:
+          particle.draw(p)
+          particle.update()
+          if (particle.isAlive()) {
+            nextGeneration.push(particle)
+          }
+          break
+        case 2:
+          const level = amplitude.getLevel()
+          particle.radius = 25 * level + 10
+          particle.draw(p)
+          nextGeneration.push(particle)
+          break
+      }
+    }
+    return nextGeneration
+  }
+
+  let generateRandomly = (beats) => {
     for (let b of beats) {
       const r = b.range
       const prop = pprops[r]
@@ -88,6 +139,26 @@ export function sketch(p) {
     }
   }
 
+  let generateCentered = (beats) => {
+    for (let b of beats) {
+      const r = b.range
+      const prop = pprops[r]
+      const count = prop.count
+      for (let i = 0; i < count; i += 1) {
+        const pos = p.createVector(0, 0, 0)
+        const vel = p5.Vector.random3D()
+        vel.normalize()
+        vel.mult(20.0 * b.level)
+        const acc = p.createVector(0, 0, 0)
+        const col = randomSelectedColor()
+        const size = 15 * (1.0 - b.level)
+        const particle = new Particle(pos, vel, acc, size, col)
+        particle.resetLife(140)
+        particles.push(particle)
+      }
+    }
+  }
+
   let spawnParticle = (size, col) => {
     const x = p.random(-p.width / 2.0, p.width / 2.0)
     const y = p.random(-p.height / 2.0, p.height / 2.0)
@@ -96,8 +167,14 @@ export function sketch(p) {
     const vel = p5.Vector.random3D()
     vel.normalize()
     vel.mult(5.0)
-    const acc = p.createVector(0, 0)
+    const acc = p.createVector(0, 0, 0)
     return new Particle(pos, vel, acc, size, col)
+  }
+
+  let concentrate = () => {
+    for (let particle of particles) {
+      particle.acc = p5.Vector.mult(particle.pos, -0.05)
+    }
   }
 
   let randomColor = () => {
