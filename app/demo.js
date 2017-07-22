@@ -38,7 +38,7 @@ export function sketch(p) {
     }
   }
 
-  let mode = 1
+  let mode = 0
 
   p.preload = function () {
     sampleSound = p.loadSound('assets/sample.mp3')
@@ -64,14 +64,14 @@ export function sketch(p) {
 
   p.keyPressed = () => {
     switch (p.keyCode) {
-      case 48: // 0
+      case 49: // 1
         mode = 0
         break
-      case 49: // 1
+      case 50: // 2
         concentrate()
         mode = 1
         break
-      case 50: // 2
+      case 51: // 3
         mode = 2
         break
       case 67: // c
@@ -116,7 +116,7 @@ export function sketch(p) {
           break
         case 2:
           const level = amplitude.getLevel()
-          particle.radius = 25 * level + 10
+          particle.radius = 25 * level + 2
           particle.draw(p)
           nextGeneration.push(particle)
           break
