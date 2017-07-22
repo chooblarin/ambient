@@ -9,10 +9,11 @@ class Particle {
     this.size = size
     this.color = color
 
-    this.mass = size / 10
+    this.radius = size / 2.0
+    this.mass = size / 10.0
     this.decayRate = 0.95
-    this.life = 100
-    this.maxLife = 100
+    this.life = 200
+    this.maxLife = 200
   }
 
   applyForce(f) {
@@ -38,9 +39,12 @@ class Particle {
     const colB = $.blue(this.color)
     const colA = 255 * this.life / this.maxLife
     const col = $.color(colR, colG, colB, colA)
-    $.noStroke()
     $.fill(col)
-    $.ellipse(this.pos.x, this.pos.y, this.size, this.size)
+    $.push()
+    $.translate(- $.width / 2.0, - $.height / 2.0)
+    $.translate(this.pos.x, this.pos.y, this.pos.z)
+    $.sphere(this.radius)
+    $.pop()
   }
 }
 

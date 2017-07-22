@@ -21,19 +21,19 @@ export function sketch(p) {
     },
     'lowMid': {
       size: 40,
-      count: 3
+      count: 5
     },
     'mid': {
       size: 30,
-      count: 5
+      count: 10
     },
     'highMid': {
       size: 20,
-      count: 5
+      count: 10
     },
     'treble': {
-      size: 5,
-      count: 40
+      size: 10,
+      count: 30
     },
   }
 
@@ -42,13 +42,14 @@ export function sketch(p) {
   }
 
   p.setup = () => {
-    p5canvas = p.createCanvas(p.windowWidth, p.windowHeight)
+    p5canvas = p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL)
     fft = new p5.FFT()
     sampleSound.play()
   }
 
   p.draw = () => {
-    p.clear()
+    p.orbitControl()
+
     p.background(255)
 
     fft.analyze()
@@ -90,11 +91,12 @@ export function sketch(p) {
   let spawnParticle = (size, col) => {
     const x = p.random(p.width)
     const y = p.random(p.height)
-    const pos = p.createVector(x, y)
-    const vel = p5.Vector.random2D()
-    const acc = p.createVector(0, 0)
+    const z = p.random(100, -1000)
+    const pos = p.createVector(x, y, z)
+    const vel = p5.Vector.random3D()
     vel.normalize()
     vel.mult(5.0)
+    const acc = p.createVector(0, 0)
     return new Particle(pos, vel, acc, size, col)
   }
 
