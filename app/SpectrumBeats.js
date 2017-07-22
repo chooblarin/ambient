@@ -23,7 +23,7 @@ SpectrumBeats.detect = (fft) => {
     const beatDetector = detectors[r]
     const isBeatDetected = beatDetector.detect(level)
     if (isBeatDetected) {
-      beats.push(r)
+      beats.push({range: r, level: level})
     }
   }
   return beats

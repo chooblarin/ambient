@@ -15,11 +15,26 @@ export function sketch(p) {
   let particles = []
 
   let pprops = {
-    'bass': {size: 80, count: 3},
-    'lowMid': {size: 40, count: 3},
-    'mid': {size: 30, count: 5},
-    'highMid': {size: 20, count: 5},
-    'treble': {size: 5, count: 40},
+    'bass': {
+      size: 80,
+      count: 3
+    },
+    'lowMid': {
+      size: 40,
+      count: 3
+    },
+    'mid': {
+      size: 30,
+      count: 5
+    },
+    'highMid': {
+      size: 20,
+      count: 5
+    },
+    'treble': {
+      size: 5,
+      count: 40
+    },
   }
 
   p.preload = function () {
@@ -38,15 +53,8 @@ export function sketch(p) {
 
     fft.analyze()
     const beats = SpectrumBeats.detect(fft)
-    for (let b of beats) {
-      const count = pprops[b].count
-      for (let i = 0; i < count; i += 1) {
-        const col = randomColor()
-        const size = pprops[b].size
-        const particle = spawnParticle(size, col)
-        particles.push(particle)
-      }
-    }
+
+    drawRandomly(beats)
 
     let nextGeneration = []
     for (let particle of particles) {
@@ -64,6 +72,20 @@ export function sketch(p) {
     if (32 == p.keyCode) { // Space
       for (let i = 0; i < 5; i += 1) {
         const particle = spawnParticle()
+        particles.push(particle)
+      }
+    }
+  }
+
+  let drawRandomly = (beats) => {
+    for (let b of beats) {
+      const r = b.range
+      const prop = pprops[r]
+      const count = prop.count
+      for (let i = 0; i < count; i += 1) {
+        const col = randomColor()
+        const size = prop.size
+        const particle = spawnParticle(size, col)
         particles.push(particle)
       }
     }
