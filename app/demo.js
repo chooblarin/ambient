@@ -38,20 +38,31 @@ export function sketch(p) {
     }
   }
 
+  let isLoading = true
   let mode = 0
-
-  p.preload = function () {
-    sampleSound = p.loadSound('assets/sample.mp3')
-  }
 
   p.setup = () => {
     p5canvas = p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL)
+
+    sampleSound = p.loadSound('assets/sample.mp3',
+      () => {
+        isLoading = false
+        sampleSound.setVolume(0.1)
+        sampleSound.play()
+      },
+      (err) => {
+        console.log(err)
+      })
+
     amplitude = new p5.Amplitude()
     fft = new p5.FFT()
-    sampleSound.play()
   }
 
   p.draw = () => {
+    if (isLoading) {
+      return
+    }
+
     p.orbitControl()
 
     p.background(255)
