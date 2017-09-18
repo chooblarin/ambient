@@ -51,7 +51,9 @@ const common = {
         loaders: 'file'
       }
     ]
-  }
+  },
+
+  devtool: 'inline-source-map'
 }
 
 if ('start' == TARGET || !TARGET) {
